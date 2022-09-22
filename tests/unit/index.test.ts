@@ -30,5 +30,27 @@ describe("Voucher teste", () => {
 
         expect(result).rejects.toEqual({message: "Voucher already exist.", type: "conflict"});
     });
+
+    it("should discount", async() => {
+        const voucher: VoucherCreateData = {
+            code: "aaa900",
+            discount: 30,
+            used: false
+        };
+        jest.spyOn(voucherRepository, "getVoucherByCode").mockImplementationOnce((): any => {
+            return {
+                id: 1,
+                code: voucher.code,
+                discount: voucher.discount,
+                used: voucher.used
+            }
+        });
+        const amount = 200;
+        const result = await voucherService.applyVoucher(voucher.code, voucher.discount);
+
+        expect(result.amount).toBe(amount);
+        expect(result.discount).toBe(voucher.discount);
+        expect(result.finalAmount).toBe(amount*(1-(voucher.discount/100)));
+    })
     
 })
